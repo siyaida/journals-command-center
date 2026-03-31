@@ -50,6 +50,47 @@
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 12px;
   }
+  .card-premium {
+    background: linear-gradient(135deg, rgba(16,16,28,0.96) 0%, rgba(10,10,18,0.98) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    box-shadow:
+      0 4px 24px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .card-premium::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ── Gradient text ── */
+  .text-gradient-green {
+    background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #00d4ff 0%, #9945ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-purple {
+    background: linear-gradient(135deg, #9945ff 0%, #ff2d78 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
   /* ── Neon glow text ── */
   .glow-green { text-shadow: 0 0 12px rgba(0,255,136,0.6), 0 0 24px rgba(0,255,136,0.3); }
@@ -88,8 +129,9 @@
   }
   .section-label-accent {
     @apply text-xs font-semibold uppercase tracking-widest;
-    color: rgba(0,255,136,0.5);
+    color: rgba(0,255,136,0.6);
     font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.15em;
   }
 
   /* ── Filter pills ── */
@@ -152,6 +194,23 @@
   .status-dot-paused  { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.7); }
   .status-dot-idle    { background: #3d3d55; }
 
+  /* ── Pulse ring (running indicator) ── */
+  .pulse-ring {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid #00ff88;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
   /* ── Page header ── */
   .page-header {
     border-bottom: 1px solid rgba(255,255,255,0.04);
@@ -166,21 +225,76 @@
   }
   .page-subtitle {
     font-size: 0.8125rem;
-    color: #3d3d55;
+    color: #64748b;
     margin-top: 0.25rem;
     font-family: 'JetBrains Mono', monospace;
   }
 
+  /* ── Scan line overlay ── */
+  .scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    pointer-events: none;
+    animation: scan 5s linear infinite;
+  }
+
+  /* ── Shimmer loading ── */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
   /* ── Animations ── */
-  .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-  .animate-slide-up { animation: slideUp 0.3s ease-out; }
+  .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+  .animate-slide-up { animation: slideUp 0.35s ease-out; }
+  .animate-float { animation: float 4s ease-in-out infinite; }
+  .animate-glow-pulse { animation: glow-pulse 2.5s ease-in-out infinite; }
 
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes scan {
+    0%   { top: -2px; opacity: 0; }
+    5%   { opacity: 1; }
+    95%  { opacity: 0.6; }
+    100% { top: 100%; opacity: 0; }
+  }
+  @keyframes shimmer {
+    0%   { transform: translateX(-200%); }
+    100% { transform: translateX(300%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-4px); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1; }
+  }
+  @keyframes pulse-ring {
+    0%   { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes border-flow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 }
 
 /* ── Horizontal separator with neon fade ── */
@@ -190,3 +304,17 @@
   border: none;
   margin: 1.5rem 0;
 }
+
+/* ── Dot-grid background ── */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(0,255,136,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Stagger animation helpers ── */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }

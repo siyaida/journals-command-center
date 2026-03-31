@@ -8,7 +8,7 @@ import Assets from './pages/Assets.jsx'
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#05050a' }}>
+    <div className="min-h-screen flex flex-col bg-dot-grid" style={{ background: '#05050a' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
