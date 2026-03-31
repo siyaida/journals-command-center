@@ -1,0 +1,19 @@
+services:
+  command-center:
+    build: .
+    container_name: siyada-command-center
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://journals_user:${DB_PASSWORD}@db:5432/journals
+      - PAPERCLIP_API_URL=${PAPERCLIP_API_URL}
+      - PAPERCLIP_API_KEY=${PAPERCLIP_API_KEY}
+      - PAPERCLIP_COMPANY_ID=${PAPERCLIP_COMPANY_ID}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3200
+    ports:
+      - "3200:3200"
+
+networks:
+  default:
+    external: true
+    name: siyada-orchestrator_default
