@@ -3,24 +3,22 @@ import { useParams } from 'react-router-dom'
 import { useApi } from '../hooks/useApi.js'
 import TaskCard from '../components/TaskCard.jsx'
 
-const STATUSES = ['all', 'in_progress', 'blocked', 'done', 'todo']
-const CATEGORIES = ['all', 'strategy', 'infra', 'engineering', 'hiring', 'product', 'deployment', 'marketing']
+const STATUSES = ['all', 'in_progress', 'blocked', 'todo', 'done']
+
+const STATUS_COUNTS = (tasks, s) =>
+  s === 'all' ? tasks.length : tasks.filter(t => t.status === s).length
 
 export default function JournalView() {
   const { agentKey, date } = useParams()
   const [statusFilter, setStatusFilter] = useState('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
 
   const { data: agent } = useApi(agentKey ? `/api/agents/${agentKey}` : null)
   const dateParam = date ? `?date=${date}` : ''
   const { data: tasks, loading } = useApi(agentKey ? `/api/journal/${agentKey}/tasks${dateParam}` : null)
   const { data: decisions } = useApi(agentKey ? `/api/decisions?agentKey=${agentKey}` : null)
 
-  const filtered = (tasks ?? []).filter((t) => {
-    if (statusFilter !== 'all' && t.status !== statusFilter) return false
-    if (categoryFilter !== 'all' && t.category !== categoryFilter) return false
-    return true
-  })
+  const all = tasks ?? []
+  const filtered = statusFilter === 'all' ? all : all.filter(t => t.status === statusFilter)
 
   const grouped = filtered.reduce((acc, task) => {
     const day = task.date ?? 'Undated'
@@ -29,45 +27,113 @@ export default function JournalView() {
     return acc
   }, {})
 
+  const inProgressCount = all.filter(t => t.status === 'in_progress').length
+  const blockedCount    = all.filter(t => t.status === 'blocked').length
+  const doneCount       = all.filter(t => t.status === 'done').length
+
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">
-          {agent?.name ?? agentKey} Journal
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">{agent?.title ?? agent?.role}</p>
+    <div className="animate-fade-in">
+      {/* Agent hero */}
+      <div className="page-header">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span
+                className="w-2.5 h-2.5 rounded-full"
+                style={{
+                  background: agent?.status === 'running' ? '#00ff88' : '#252535',
+                  boxShadow: agent?.status === 'running' ? '0 0 8px rgba(0,255,136,0.7)' : 'none',
+                }}
+              />
+              <h1 className="page-title">{agent?.name ?? agentKey}</h1>
+            </div>
+            <p className="page-subtitle">
+              {agent?.title ?? agent?.role?.toUpperCase()} · Journal
+            </p>
+          </div>
+
+          {/* Mini KPIs */}
+          {all.length > 0 && (
+            <div className="flex gap-3">
+              {[
+                { v: inProgressCount, l: 'active',  c: '#00d4ff' },
+                { v: blockedCount,    l: 'blocked', c: '#ff2d78' },
+                { v: doneCount,       l: 'done',    c: '#00ff88' },
+              ].map(({ v, l, c }) => (
+                <div
+                  key={l}
+                  className="text-center rounded-lg px-3 py-2"
+                  style={{ background: `${c}08`, border: `1px solid ${c}18`, minWidth: '52px' }}
+                >
+                  <div className="font-bold font-mono text-lg leading-none" style={{ color: c }}>
+                    {v}
+                  </div>
+                  <div className="font-mono text-xs mt-0.5" style={{ color: `${c}50` }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-6 mb-6">
-        <div className="flex gap-2">
-          {STATUSES.map((s) => (
+      {/* Status filters */}
+      <div className="flex items-center gap-2 mb-6">
+        {STATUSES.map((s) => {
+          const count = STATUS_COUNTS(all, s)
+          const active = statusFilter === s
+          return (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`text-xs px-3 py-1 rounded border transition-colors ${
-                statusFilter === s
-                  ? 'bg-dark-600 border-gray-500 text-white'
-                  : 'border-dark-600 text-gray-500 hover:text-gray-300'
-              }`}
+              className={`filter-pill ${active ? 'active' : ''}`}
             >
               {s.replace('_', ' ')}
+              {s !== 'all' && (
+                <span
+                  className="ml-1 font-bold"
+                  style={{ opacity: active ? 1 : 0.5 }}
+                >
+                  {count}
+                </span>
+              )}
             </button>
-          ))}
-        </div>
+          )
+        })}
+        <div className="flex-1" />
+        <span className="font-mono text-xs" style={{ color: '#252535' }}>
+          {filtered.length} task{filtered.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
+      {/* Task list */}
       {loading ? (
         <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="card animate-pulse h-14" />
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="rounded-lg animate-pulse"
+              style={{ height: '56px', background: 'rgba(255,255,255,0.02)' }}
+            />
           ))}
         </div>
-      ) : (
+      ) : Object.keys(grouped).length > 0 ? (
         <div className="space-y-8">
           {Object.keys(grouped).sort().reverse().map((day) => (
             <div key={day}>
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mono">{day}</div>
+              <div
+                className="flex items-center gap-3 mb-3"
+              >
+                <span className="font-mono text-xs font-semibold" style={{ color: '#252535' }}>
+                  {day}
+                </span>
+                <div
+                  className="flex-1 h-px"
+                  style={{ background: 'rgba(255,255,255,0.04)' }}
+                />
+                <span className="font-mono text-xs" style={{ color: '#1a1a2a' }}>
+                  {grouped[day].length}
+                </span>
+              </div>
               <div className="space-y-2">
                 {grouped[day].map((task) => (
                   <TaskCard key={task.id} task={task} />
@@ -75,24 +141,52 @@ export default function JournalView() {
               </div>
             </div>
           ))}
-          {Object.keys(grouped).length === 0 && (
-            <div className="text-gray-600 text-sm">No tasks match the current filters.</div>
-          )}
+        </div>
+      ) : (
+        <div
+          className="rounded-xl p-10 text-center"
+          style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)' }}
+        >
+          <div className="font-mono text-xs" style={{ color: '#252535' }}>
+            {all.length === 0 ? 'No tasks found for this agent.' : 'No tasks match the current filter.'}
+          </div>
         </div>
       )}
 
-      {/* Decision Log */}
+      {/* Decision log */}
       {decisions && decisions.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Decision Log</h2>
+        <div className="mt-12">
+          <hr className="neon-divider" />
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-label-accent">◎ Decision Log</div>
+            <div
+              className="flex-1 h-px"
+              style={{ background: 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' }}
+            />
+          </div>
           <div className="space-y-3">
             {decisions.map((d) => (
-              <div key={d.id} className="card">
-                <div className="font-medium text-white text-sm">{d.title}</div>
-                <div className="text-xs text-gray-500 mono mt-0.5">{d.date}</div>
-                {d.decision && (
-                  <div className="mt-2 text-xs text-gray-400">{d.decision}</div>
-                )}
+              <div
+                key={d.id}
+                className="rounded-lg p-4"
+                style={{
+                  background: 'rgba(12,12,20,0.7)',
+                  borderLeft: '3px solid rgba(0,255,136,0.3)',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                  borderLeftColor: 'rgba(0,255,136,0.3)',
+                }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm" style={{ color: '#cbd5e1' }}>{d.title}</div>
+                    {d.decision && (
+                      <div className="mt-1.5 text-xs" style={{ color: '#475569' }}>{d.decision}</div>
+                    )}
+                  </div>
+                  <div className="font-mono text-xs flex-shrink-0" style={{ color: '#252535' }}>
+                    {d.date}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

@@ -8,17 +8,20 @@ import Assets from './pages/Assets.jsx'
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#05050a' }}>
       <Header />
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 p-6 overflow-auto">
+        <main
+          className="flex-1 overflow-auto"
+          style={{ padding: '2rem 2.5rem' }}
+        >
           <Routes>
-            <Route path="/" element={<CommandCenter />} />
-            <Route path="/journal/:agentKey" element={<JournalView />} />
-            <Route path="/journal/:agentKey/:date" element={<JournalView />} />
-            <Route path="/decisions" element={<Decisions />} />
-            <Route path="/assets" element={<Assets />} />
+            <Route path="/"                         element={<CommandCenter />} />
+            <Route path="/journal/:agentKey"        element={<JournalView />} />
+            <Route path="/journal/:agentKey/:date"  element={<JournalView />} />
+            <Route path="/decisions"                element={<Decisions />} />
+            <Route path="/assets"                   element={<Assets />} />
           </Routes>
         </main>
       </div>
