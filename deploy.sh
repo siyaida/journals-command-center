@@ -10,7 +10,18 @@ set -e
 
 # ── EDIT THESE ──────────────────────────────────────────────────────────────
 DB_PASSWORD="CHANGE_ME_strong_password_here"
+# PAPERCLIP_API_URL: this container joins siyada-orchestrator_default network.
+# 'localhost' inside a container refers to the container itself, NOT the host.
+# Options:
+#   - If Paperclip API is another service on that network: use its service name
+#     e.g. PAPERCLIP_API_URL="http://api:3100"
+#   - If Paperclip API runs on the VPS host: use host.docker.internal:3100
+#     (works on Linux with --add-host=host.docker.internal:host-gateway in compose)
+# Check your Paperclip docker-compose service names with: docker ps --format '{{.Names}}'
 PAPERCLIP_API_URL="http://localhost:3100"
+# PAPERCLIP_API_KEY: must be a long-lived API key, NOT a short-lived run JWT.
+# Short-lived JWTs expire quickly and will cause 503 errors on all API routes.
+# Get a permanent key from the Paperclip admin dashboard or CLI.
 PAPERCLIP_API_KEY="your-paperclip-api-key"
 PAPERCLIP_COMPANY_ID="your-company-id"
 JWT_SECRET="$(openssl rand -hex 32)"

@@ -12,6 +12,10 @@ services:
       - PORT=3200
     ports:
       - "3200:3200"
+    # Allows using host.docker.internal to reach the VPS host from inside the container.
+    # Useful if PAPERCLIP_API_URL needs to reach a service running directly on the host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   default:

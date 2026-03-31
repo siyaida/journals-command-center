@@ -22,7 +22,8 @@ router.get('/', async (req, res) => {
     )
     res.json(rows)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[decisions] GET error:', err.message)
+    res.status(503).json({ error: 'Database unavailable', detail: err.message })
   }
 })
 
@@ -41,7 +42,8 @@ router.post('/', async (req, res) => {
     )
     res.status(201).json(rows[0])
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[decisions] POST error:', err.message)
+    res.status(503).json({ error: 'Database unavailable', detail: err.message })
   }
 })
 

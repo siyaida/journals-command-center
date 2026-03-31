@@ -20,7 +20,8 @@ router.get('/snapshot', async (_req, res) => {
       snapshotAt: new Date().toISOString(),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[kpi] snapshot error:', err.message)
+    res.status(503).json({ error: 'Paperclip API unavailable', detail: err.message })
   }
 })
 
@@ -45,7 +46,8 @@ router.get('/agent-summaries', async (_req, res) => {
 
     res.json(summaries)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[kpi] agent-summaries error:', err.message)
+    res.status(503).json({ error: 'Paperclip API unavailable', detail: err.message })
   }
 })
 

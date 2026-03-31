@@ -9,7 +9,8 @@ router.get('/', async (_req, res) => {
     const agents = await fetchAgents()
     res.json(agents)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[agents] fetchAgents error:', err.message)
+    res.status(503).json({ error: 'Paperclip API unavailable', detail: err.message })
   }
 })
 
@@ -20,7 +21,8 @@ router.get('/:urlKey', async (req, res) => {
     if (!agent) return res.status(404).json({ error: 'Agent not found' })
     res.json(agent)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[agents] fetchAgentByUrlKey error:', err.message)
+    res.status(503).json({ error: 'Paperclip API unavailable', detail: err.message })
   }
 })
 
