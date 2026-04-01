@@ -10,6 +10,7 @@ import kpiRouter from './src/routes/kpi.js'
 import decisionsRouter from './src/routes/decisions.js'
 import assetsRouter from './src/routes/assets.js'
 import { runSync } from './src/services/sync.js'
+import { runMigrations } from './src/db/pool.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const STATIC_DIR = path.join(__dirname, '../frontend/dist')
@@ -24,18 +25,12 @@ app.use(express.json())
 app.get('/api/health', async (_req, res) => {
   const checks = { ok: true, ts: new Date().toISOString(), services: {} }
 
-  // Check Paperclip API
+  // Check Paperclip API (uses same fetchAgents with localhost→host.docker.internal fallback)
   try {
-    const BASE = process.env.PAPERCLIP_API_URL || 'http://localhost:3100'
-    const KEY  = process.env.PAPERCLIP_API_KEY
-    const COMPANY = process.env.PAPERCLIP_COMPANY_ID
-    if (!KEY)     throw new Error('PAPERCLIP_API_KEY not set')
-    if (!COMPANY) throw new Error('PAPERCLIP_COMPANY_ID not set')
-    const r = await fetch(`${BASE}/api/companies/${COMPANY}/agents`, {
-      headers: { Authorization: `Bearer ${KEY}` },
-      signal: AbortSignal.timeout(5000),
-    })
-    if (!r.ok) throw new Error(`HTTP ${r.status}`)
+    const { fetchAgents } = await import('./src/services/paperclip.js')
+    if (!process.env.PAPERCLIP_API_KEY) throw new Error('PAPERCLIP_API_KEY not set')
+    if (!process.env.PAPERCLIP_COMPANY_ID) throw new Error('PAPERCLIP_COMPANY_ID not set')
+    await fetchAgents()
     checks.services.paperclip = 'ok'
   } catch (e) {
     checks.ok = false
@@ -73,6 +68,8 @@ cron.schedule('*/15 * * * *', () => {
 
 app.listen(PORT, () => {
   console.log(`Command Center API listening on port ${PORT}`)
-  // Run an initial sync on startup
-  runSync().catch((err) => console.error('[sync] Initial sync error:', err))
+  // Run migrations, then initial Paperclip sync
+  runMigrations()
+    .then(() => runSync())
+    .catch((err) => console.error('[startup] Error:', err))
 })
