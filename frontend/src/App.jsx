@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { useTheme } from './hooks/useTheme.js'
 import Header from './components/Header.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import CommandCenter from './pages/CommandCenter.jsx'
@@ -7,9 +8,11 @@ import Decisions from './pages/Decisions.jsx'
 import Assets from './pages/Assets.jsx'
 
 export default function App() {
+  const { theme, toggle } = useTheme()
+
   return (
-    <div className="min-h-screen flex flex-col bg-dot-grid" style={{ background: '#05050a' }}>
-      <Header />
+    <div className="min-h-screen flex flex-col bg-dot-grid" style={{ background: 'var(--bg-main)' }}>
+      <Header theme={theme} onToggleTheme={toggle} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <main

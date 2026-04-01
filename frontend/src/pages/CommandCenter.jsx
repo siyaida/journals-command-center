@@ -25,7 +25,7 @@ export default function CommandCenter() {
                 className="font-mono text-xs px-2.5 py-1 rounded-full"
                 style={{
                   background: 'rgba(0,255,136,0.07)',
-                  color: '#00ff88',
+                  color: 'var(--neon-green)',
                   border: '1px solid rgba(0,255,136,0.2)',
                   letterSpacing: '0.1em',
                 }}
@@ -36,41 +36,35 @@ export default function CommandCenter() {
             <p className="page-subtitle">{now}</p>
           </div>
 
-          {/* Online status summary */}
+          {/* Online status panel */}
           <div
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
             style={{
-              background: 'rgba(14,14,22,0.8)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'var(--bg-card-solid)',
+              border: '1px solid var(--border-card)',
               backdropFilter: 'blur(12px)',
             }}
           >
             <div className="text-right">
-              <div className="font-mono text-xs font-semibold" style={{ color: '#94a3b8' }}>
+              <div className="font-mono text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
                 AI Operations
               </div>
-              <div className="font-mono text-xs" style={{ color: '#475569' }}>
+              <div className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
                 SIYADA TECH
               </div>
             </div>
-            <div
-              className="w-px h-8"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
-            />
+            <div className="w-px h-8" style={{ background: 'var(--border-subtle)' }} />
             <div className="text-center">
               <div
                 className="font-mono text-lg font-bold tabular-nums leading-none"
-                style={{
-                  color: onlineCount > 0 ? '#00ff88' : '#334155',
-                  textShadow: onlineCount > 0 ? '0 0 16px rgba(0,255,136,0.5)' : 'none',
-                }}
+                style={{ color: onlineCount > 0 ? 'var(--neon-green)' : 'var(--text-dimmer)' }}
               >
                 {onlineCount}
-                <span className="text-xs font-normal" style={{ color: '#334155' }}>
+                <span className="text-xs font-normal" style={{ color: 'var(--text-dimmer)' }}>
                   /{totalCount}
                 </span>
               </div>
-              <div className="font-mono" style={{ fontSize: '0.55rem', color: '#334155', letterSpacing: '0.1em' }}>
+              <div className="font-mono" style={{ fontSize: '0.55rem', color: 'var(--text-dimmer)', letterSpacing: '0.1em' }}>
                 ONLINE
               </div>
             </div>
@@ -84,12 +78,9 @@ export default function CommandCenter() {
       {/* Agents section header */}
       <div className="mb-5 flex items-center gap-3">
         <div className="section-label-accent">◈ C-Level Agents</div>
-        <div
-          className="flex-1 h-px"
-          style={{ background: 'linear-gradient(90deg, rgba(0,255,136,0.12), transparent)' }}
-        />
+        <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(0,255,136,0.12), transparent)' }} />
         {agents && (
-          <span className="font-mono text-xs" style={{ color: '#334155' }}>
+          <span className="font-mono text-xs" style={{ color: 'var(--text-dimmer)' }}>
             {onlineCount} active · {totalCount} total
           </span>
         )}
@@ -99,11 +90,7 @@ export default function CommandCenter() {
       {agentsLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl shimmer"
-              style={{ height: '192px', background: 'rgba(255,255,255,0.02)' }}
-            />
+            <div key={i} className="rounded-2xl shimmer" style={{ height: '192px', background: 'var(--bg-input)' }} />
           ))}
         </div>
       ) : agents?.length > 0 ? (
@@ -118,18 +105,9 @@ export default function CommandCenter() {
           ))}
         </div>
       ) : (
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{
-            background: 'rgba(255,255,255,0.01)',
-            border: '1px solid rgba(255,255,255,0.04)',
-          }}
-        >
-          <div
-            className="font-mono text-xs"
-            style={{ color: '#334155' }}
-          >
-            No agents synced yet — run /api/issues/sync to populate
+        <div className="rounded-2xl p-12 text-center" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-subtle)' }}>
+          <div className="font-mono text-xs" style={{ color: 'var(--text-dimmer)' }}>
+            No agents synced yet
           </div>
         </div>
       )}
